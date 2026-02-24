@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Disaster Relief Routing</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#cfd8dc;
+text-align:center;
+margin:0;
+}
+
+header{
+background:#263238;
+color:white;
+padding:20px;
+}
+
+section{
+background:white;
+margin:20px;
+padding:20px;
+border-radius:12px;
+box-shadow:0 0 10px gray;
+}
+
+.node{
+display:inline-block;
+background:#eeeeee;
+padding:18px;
+margin:10px;
+border-radius:12px;
+width:130px;
+}
+
+select,input{
+padding:10px;
+margin:8px;
+}
+
+button{
+padding:12px 25px;
+background:#1976d2;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+#result{
+font-size:20px;
+color:#0d47a1;
+margin-top:15px;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Disaster Relief Supply Routing</h1>
+<p>Find Optimal Route using BFS and A* Algorithms</p>
+</header>
+
+<!-- USER DETAILS -->
+<section>
+
+<h2>User Information</h2>
+
+<input id="name" placeholder="Enter Name"><br>
+<input id="location" placeholder="Enter Location"><br>
+
+<button onclick="saveUser()">Save User</button>
+
+<p id="user"></p>
+
+</section>
+
+<!-- ROUTE NETWORK -->
+<section>
+
+<h2>Route Network</h2>
+
+<div class="node">A<br>Relief Center</div>
+<div class="node">B<br>Checkpoint</div>
+<div class="node">C<br>Safe Route</div>
+<div class="node">D<br>Blocked Area</div>
+<div class="node">E<br>Medical Camp</div>
+<div class="node">F<br>Disaster Area</div>
+
+<br>
+
+<select id="start">
+<option>A</option>
+<option>B</option>
+<option>C</option>
+</select>
+
+<select id="goal">
+<option>F</option>
+<option>E</option>
+<option>D</option>
+</select>
+
+</section>
+
+<!-- ALGORITHM -->
+<section>
+
+<h2>Algorithm Demonstration</h2>
+
+<select id="algo">
+<option value="bfs">BFS Algorithm</option>
+<option value="astar">A* Algorithm</option>
+</select>
+
+<br><br>
+
+<button onclick="findRoute()">Find Optimal Route</button>
+
+<div id="result"></div>
+
+</section>
+
+<script>
+
+/* USER DISPLAY */
+
+function saveUser(){
+let name=document.getElementById("name").value;
+let loc=document.getElementById("location").value;
+
+document.getElementById("user").innerHTML=
+"User: "+name+" | Location: "+loc;
+}
+
+/* GRAPH WITH TWO DIFFERENT PATHS */
+
+const graph={
+A:["B","C"],
+B:["E"],
+C:["D"],
+D:["F"],
+E:["F"],
+F:[]
+};
+
+/* ---------- BFS ---------- */
+
+function bfs(start,goal){
+
+let queue=[start];
+let visited=[start];
+let parent={};
+
+while(queue.length){
+
+let node=queue.shift();
+
+if(node===goal) break;
+
+for(let n of graph[node]){
+if(!visited.includes(n)){
+visited.push(n);
+parent[n]=node;
+queue.push(n);
+}
+}
+}
+
+return buildPath(parent,start,goal);
+}
+
+/* ---------- A* ---------- */
+
+function astar(start,goal){
+
+let heuristic={
+A:5,
+B:4,
+C:2,
+D:1,
+E:3,
+F:0
+};
+
+let open=[start];
+let visited=[];
+let parent={};
+
+while(open.length){
+
+open.sort((a,b)=>heuristic[a]-heuristic[b]);
+
+let node=open.shift();
+visited.push(node);
+
+if(node===goal) break;
+
+for(let n of graph[node]){
+if(!visited.includes(n)){
+parent[n]=node;
+open.push(n);
+}
+}
+}
+
+return buildPath(parent,start,goal);
+}
+
+/* BUILD PATH */
+
+function buildPath(parent,start,goal){
+
+let path=[goal];
+let current=goal;
+
+while(current!==start){
+current=parent[current];
+if(!current) return "No Route Found";
+path.unshift(current);
+}
+
+return path.join(" → ");
+}
+
+/* MAIN FUNCTION */
+
+function findRoute(){
+
+let start=document.getElementById("start").value;
+let goal=document.getElementById("goal").value;
+let algo=document.getElementById("algo").value;
+
+let result;
+
+if(algo==="bfs")
+result=bfs(start,goal);
+else
+result=astar(start,goal);
+
+document.getElementById("result").innerHTML=
+algo.toUpperCase()+" Route : "+result;
+}
+
+</script>
+
+</body>
+</html>
